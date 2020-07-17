@@ -80,7 +80,7 @@ class AbstractChart<
       stroke: this.props.chartConfig.color(0.2),
       strokeDasharray: "5, 10",
       strokeWidth: 1,
-      ...propsForBackgroundLines
+      ...propsForBackgroundLines,
     };
   }
 
@@ -88,16 +88,16 @@ class AbstractChart<
     const {
       propsForLabels = {},
       color,
-      labelColor = color
+      labelColor = color,
     } = this.props.chartConfig;
     return {
       fontSize: 12,
       fill: labelColor(0.8),
-      ...propsForLabels
+      ...propsForLabels,
     };
   }
 
-  renderHorizontalLines = config => {
+  renderHorizontalLines = (config) => {
     const { count, width, height, paddingTop, paddingRight } = config;
     const basePosition = height - height / 4;
 
@@ -116,7 +116,7 @@ class AbstractChart<
     });
   };
 
-  renderHorizontalLine = config => {
+  renderHorizontalLine = (config) => {
     const { width, height, paddingTop, paddingRight } = config;
     return (
       <Line
@@ -141,13 +141,13 @@ class AbstractChart<
       paddingRight,
       horizontalLabelRotation = 0,
       decimalPlaces = 2,
-      formatYLabel = (yLabel: string) => yLabel
+      formatYLabel = (yLabel: string) => yLabel,
     } = config;
 
     const {
       yAxisLabel = "",
       yAxisSuffix = "",
-      yLabelsOffset = 12
+      yLabelsOffset = 12,
     } = this.props;
     return new Array(count === 1 ? 1 : count + 1).fill(1).map((_, i) => {
       let yLabel = String(i * count);
@@ -196,7 +196,7 @@ class AbstractChart<
     horizontalOffset = 0,
     stackedBar = false,
     verticalLabelRotation = 0,
-    formatXLabel = xLabel => xLabel
+    formatXLabel = (xLabel) => xLabel,
   }: Pick<
     AbstractChartConfig,
     | "labels"
@@ -212,7 +212,7 @@ class AbstractChart<
     const {
       xAxisLabel = "",
       xLabelsOffset = 0,
-      hidePointsAtIndex = []
+      hidePointsAtIndex = [],
     } = this.props;
 
     const fontSize = 12;
@@ -256,7 +256,7 @@ class AbstractChart<
     width,
     height,
     paddingTop,
-    paddingRight
+    paddingRight,
   }: Omit<
     Pick<
       AbstractChartConfig,
@@ -291,7 +291,7 @@ class AbstractChart<
   renderVerticalLine = ({
     height,
     paddingTop,
-    paddingRight
+    paddingRight,
   }: Pick<AbstractChartConfig, "height" | "paddingRight" | "paddingTop">) => (
     <Line
       key={Math.random()}
@@ -311,6 +311,7 @@ class AbstractChart<
         | "backgroundGradientToOpacity"
         | "fillShadowGradient"
         | "fillShadowGradientOpacity"
+        | "inActiveFillShadowGradient"
       >,
       | "width"
       | "height"
@@ -322,6 +323,7 @@ class AbstractChart<
       | "backgroundGradientToOpacity"
       | "fillShadowGradient"
       | "fillShadowGradientOpacity"
+      | "inActiveFillShadowGradient"
     >
   ) => {
     const {
@@ -330,7 +332,7 @@ class AbstractChart<
       backgroundGradientFrom,
       backgroundGradientTo,
       useShadowColorFromDataset,
-      data
+      data,
     } = config;
 
     const fromOpacity = config.hasOwnProperty("backgroundGradientFromOpacity")
@@ -350,6 +352,11 @@ class AbstractChart<
       ? config.fillShadowGradientOpacity
       : 0.1;
 
+    const inActiveFillShadowGradient = config.hasOwnProperty(
+      "inActiveFillShadowGradient"
+    )
+      ? config.inActiveFillShadowGradient
+      : this.props.chartConfig.color(1.0);
     return (
       <Defs>
         <LinearGradient
@@ -383,20 +390,20 @@ class AbstractChart<
               gradientUnits="userSpaceOnUse"
             >
               <Stop
-                offset="0"
-                stopColor={
-                  dataset.color ? dataset.color(1.0) : fillShadowGradient
-                }
-                stopOpacity={fillShadowGradientOpacity}
-              />
-              <Stop
                 offset="1"
                 stopColor={
                   dataset.color
                     ? dataset.color(fillShadowGradientOpacity)
                     : fillShadowGradient
                 }
-                stopOpacity="0"
+                stopOpacity="0.5"
+              />
+              <Stop
+                offset="0"
+                stopColor={
+                  dataset.color ? dataset.color(1.0) : fillShadowGradient
+                }
+                stopOpacity={fillShadowGradientOpacity}
               />
             </LinearGradient>
           ))
@@ -409,14 +416,29 @@ class AbstractChart<
             y2={height}
             gradientUnits="userSpaceOnUse"
           >
-            <Stop
-              offset="0"
-              stopColor={fillShadowGradient}
-              stopOpacity={fillShadowGradientOpacity}
-            />
-            <Stop offset="1" stopColor={fillShadowGradient} stopOpacity="0" />
+            <Stop offset="0" stopColor={fillShadowGradient} stopOpacity={0.8} />
+            <Stop offset="1" stopColor={fillShadowGradient} stopOpacity={1} />
           </LinearGradient>
         )}
+        <LinearGradient
+          id="inActiveFillShadowGradient"
+          x1={0}
+          y1={0}
+          x2={0}
+          y2={height}
+          gradientUnits="userSpaceOnUse"
+        >
+          <Stop
+            offset="0"
+            stopColor={inActiveFillShadowGradient}
+            stopOpacity={0.8}
+          />
+          <Stop
+            offset="1"
+            stopColor={inActiveFillShadowGradient}
+            stopOpacity={1}
+          />
+        </LinearGradient>
       </Defs>
     );
   };

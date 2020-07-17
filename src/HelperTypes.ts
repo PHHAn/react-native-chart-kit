@@ -25,6 +25,8 @@ export interface ChartData {
 }
 
 export interface ChartConfig {
+  // can select bar or not
+  selectable?: boolean;
   backgroundColor?: string;
   /**
    * Defines the first color in the linear gradient of a chart's background
@@ -44,6 +46,7 @@ export interface ChartConfig {
   backgroundGradientToOpacity?: number;
   fillShadowGradient?: string;
   fillShadowGradientOpacity?: number;
+  inActiveFillShadowGradient?: string;
   /**
    * Defines the option to use color from dataset to each chart data
    */

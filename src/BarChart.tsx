@@ -4,7 +4,7 @@ import { G, Rect, Svg, Text } from "react-native-svg";
 
 import AbstractChart, {
   AbstractChartConfig,
-  AbstractChartProps
+  AbstractChartProps,
 } from "./AbstractChart";
 import { ChartData } from "./HelperTypes";
 
@@ -41,10 +41,22 @@ export interface BarChartProps extends AbstractChartProps {
 type BarChartState = {};
 
 class BarChart extends AbstractChart<BarChartProps, BarChartState> {
+  state = {
+    selectedBarIndex: 0,
+  };
+
   getBarPercentage = () => {
     const { barPercentage = 1 } = this.props.chartConfig;
     return barPercentage;
   };
+
+  onPressSelectingBar(value, index) {
+    const onPress = this.props.onPress;
+    if (typeof onPress === "function") {
+      onPress(value);
+    }
+    this.setState({ selectedBarIndex: index });
+  }
 
   renderBars = ({
     data,
@@ -52,7 +64,7 @@ class BarChart extends AbstractChart<BarChartProps, BarChartState> {
     height,
     paddingTop,
     paddingRight,
-    barRadius
+    barRadius,
   }: Pick<
     Omit<AbstractChartConfig, "data">,
     "width" | "height" | "paddingRight" | "paddingTop" | "barRadius"
@@ -60,12 +72,16 @@ class BarChart extends AbstractChart<BarChartProps, BarChartState> {
     data: number[];
   }) => {
     const baseHeight = this.calcBaseHeight(data, height);
+    const { selectable } = this.props.chartConfig;
+
+    const { selectedBarIndex } = this.state;
 
     return data.map((x, i) => {
       const barHeight = this.calcHeight(x, data, height);
       const barWidth = 32 * this.getBarPercentage();
       return (
         <Rect
+          onPress={() => this.onPressSelectingBar(x, i)}
           key={Math.random()}
           x={
             paddingRight +
@@ -79,7 +95,11 @@ class BarChart extends AbstractChart<BarChartProps, BarChartState> {
           rx={barRadius}
           width={barWidth}
           height={(Math.abs(barHeight) / 4) * 3}
-          fill="url(#fillShadowGradient)"
+          fill={
+            selectedBarIndex !== i && selectable
+              ? "url(#inActiveFillShadowGradient)"
+              : "url(#fillShadowGradient)"
+          }
         />
       );
     });
@@ -90,7 +110,7 @@ class BarChart extends AbstractChart<BarChartProps, BarChartState> {
     width,
     height,
     paddingTop,
-    paddingRight
+    paddingRight,
   }: Pick<
     Omit<AbstractChartConfig, "data">,
     "width" | "height" | "paddingRight" | "paddingTop"
@@ -124,7 +144,7 @@ class BarChart extends AbstractChart<BarChartProps, BarChartState> {
     width,
     height,
     paddingTop,
-    paddingRight
+    paddingRight,
   }: Pick<
     Omit<AbstractChartConfig, "data">,
     "width" | "height" | "paddingRight" | "paddingTop"
@@ -168,7 +188,7 @@ class BarChart extends AbstractChart<BarChartProps, BarChartState> {
       withInnerLines = true,
       showBarTops = true,
       showValuesOnTopOfBars = false,
-      segments = 4
+      segments = 4,
     } = this.props;
 
     const { borderRadius = 0, paddingTop = 16, paddingRight = 64 } = style;
@@ -184,14 +204,14 @@ class BarChart extends AbstractChart<BarChartProps, BarChartState> {
         (this.props.chartConfig && this.props.chartConfig.decimalPlaces) ?? 2,
       formatYLabel:
         (this.props.chartConfig && this.props.chartConfig.formatYLabel) ||
-        function(label) {
+        function (label) {
           return label;
         },
       formatXLabel:
         (this.props.chartConfig && this.props.chartConfig.formatXLabel) ||
-        function(label) {
+        function (label) {
           return label;
-        }
+        },
     };
 
     return (
@@ -199,7 +219,7 @@ class BarChart extends AbstractChart<BarChartProps, BarChartState> {
         <Svg height={height} width={width}>
           {this.renderDefs({
             ...config,
-            ...this.props.chartConfig
+            ...this.props.chartConfig,
           })}
           <Rect
             width="100%"
@@ -213,7 +233,7 @@ class BarChart extends AbstractChart<BarChartProps, BarChartState> {
               ? this.renderHorizontalLines({
                   ...config,
                   count: segments,
-                  paddingTop
+                  paddingTop,
                 })
               : null}
           </G>
@@ -224,7 +244,7 @@ class BarChart extends AbstractChart<BarChartProps, BarChartState> {
                   count: segments,
                   data: data.datasets[0].data,
                   paddingTop: paddingTop as number,
-                  paddingRight: paddingRight as number
+                  paddingRight: paddingRight as number,
                 })
               : null}
           </G>
@@ -235,7 +255,7 @@ class BarChart extends AbstractChart<BarChartProps, BarChartState> {
                   labels: data.labels,
                   paddingRight: paddingRight as number,
                   paddingTop: paddingTop as number,
-                  horizontalOffset: barWidth * this.getBarPercentage()
+                  horizontalOffset: barWidth * this.getBarPercentage(),
                 })
               : null}
           </G>
@@ -244,7 +264,7 @@ class BarChart extends AbstractChart<BarChartProps, BarChartState> {
               ...config,
               data: data.datasets[0].data,
               paddingTop: paddingTop as number,
-              paddingRight: paddingRight as number
+              paddingRight: paddingRight as number,
             })}
           </G>
           <G>
@@ -253,7 +273,7 @@ class BarChart extends AbstractChart<BarChartProps, BarChartState> {
                 ...config,
                 data: data.datasets[0].data,
                 paddingTop: paddingTop as number,
-                paddingRight: paddingRight as number
+                paddingRight: paddingRight as number,
               })}
           </G>
           <G>
@@ -262,7 +282,7 @@ class BarChart extends AbstractChart<BarChartProps, BarChartState> {
                 ...config,
                 data: data.datasets[0].data,
                 paddingTop: paddingTop as number,
-                paddingRight: paddingRight as number
+                paddingRight: paddingRight as number,
               })}
           </G>
         </Svg>
